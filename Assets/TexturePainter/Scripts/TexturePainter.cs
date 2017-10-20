@@ -20,7 +20,7 @@ public class TexturePainter : MonoBehaviour {
 	Painter_BrushMode mode; //Our painter mode (Paint brushes or decals)
 	float brushSize=1.0f; //The size of our brush
 	Color brushColor; //The selected color
-	int brushCounter=0,MAX_BRUSH_COUNT=100; //To avoid having millions of brushes
+	public int brushCounter=0,MAX_BRUSH_COUNT=50; //To avoid having millions of brushes
 	bool saving=false; //Flag to check if we are saving the texture
 
 	
@@ -30,7 +30,9 @@ public class TexturePainter : MonoBehaviour {
 			DoAction();
 		}
 		UpdateBrushCursor ();
-	}
+
+        //Invoke("SaveTexture", 0.1f);
+    }
 
 	//The main action, instantiates a brush or decal entity at the clicked position on the UV map
 	void DoAction(){	
@@ -53,13 +55,14 @@ public class TexturePainter : MonoBehaviour {
 			brushObj.transform.localScale=Vector3.one*brushSize;//The size of the brush
 		}
 		brushCounter++; //Add to the max brushes
-		if (brushCounter >= MAX_BRUSH_COUNT) { //If we reach the max brushes available, flatten the texture and clear the brushes
-			brushCursor.SetActive (false);
-			saving=true;
-			Invoke("SaveTexture",0.1f);
-			
-		}
-	}
+        if (brushCounter >= MAX_BRUSH_COUNT)
+        { //If we reach the max brushes available, flatten the texture and clear the brushes
+            brushCursor.SetActive(false);
+            saving = true;
+            Invoke("SaveTexture", 0.1f);
+
+        }
+    }
 	//To update at realtime the painting cursor on the mesh
 	void UpdateBrushCursor(){
 		Vector3 uvWorldPosition=Vector3.zero;

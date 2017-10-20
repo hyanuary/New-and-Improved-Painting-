@@ -10,6 +10,8 @@ public class PaintDetection : MonoBehaviour {
 
     public Camera sceneCamera;
 
+    public List<TexturePainter> texturePainter = new List<TexturePainter>();
+
 	// Use this for initialization
 	void Start () {
 		
@@ -19,43 +21,51 @@ public class PaintDetection : MonoBehaviour {
 	void Update ()    {
 
         CanvasDetection();
-        brushContainer[0].SetActive(true);
-        brushContainer[1].SetActive(false);
-        if(Input.GetKey(KeyCode.A))
-        {
-            brushContainer[1].SetActive(true);
-            brushContainer[0].SetActive(false);
-        }
     }
 
-    bool CanvasDetection()
+    void CanvasDetection()
     {
         RaycastHit hit;
         Vector3 mousPos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0.0f);
         Ray cursorRay = sceneCamera.ScreenPointToRay(mousPos);
 
+        
+
         if (Physics.Raycast(cursorRay, out hit, 200))
         {
             MeshCollider meshCol = hit.collider as MeshCollider;
 
-            if (meshCol == null || meshCol.sharedMaterial == null)
-                return false;
+            //if(meshCol == null)
+            //{
+
+            //}
             if(meshCol.tag == "canvas2")
             {
-                paintingCam[0].enabled = false;
-                paintingCam[1].enabled = true;
-                Debug.Log("canvas 2 activate");
+                brushContainer[1].SetActive(true);
+                brushContainer[0].SetActive(false);
+                texturePainter[1].brushCursor.SetActive(false);
+                foreach (Transform child in brushContainer[0].transform)
+                {//Clear brushes
+                    Destroy(child.gameObject);
+                }
+                Debug.Log("canvas2");
+                
             }
             else if(meshCol.tag == "canvas")
             {
-                paintingCam[1].enabled = false;
-                paintingCam[0].enabled = true;
+                brushContainer[0].SetActive(true);
+                brushContainer[1].SetActive(false);
+                texturePainter[0].brushCursor.SetActive(false);
+                foreach (Transform child in brushContainer[1].transform)
+                {//Clear brushes
+                    Destroy(child.gameObject);
+                }
+
             }
 
-            return true;
+           
         }
-        else
-            return false;
+       
 
     }
 }

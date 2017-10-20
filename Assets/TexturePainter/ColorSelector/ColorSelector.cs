@@ -22,7 +22,7 @@ public class ColorSelector : MonoBehaviour {
 	void Start () {
 		if (refCamera == null)
 			refCamera = Camera.main;
-		selectedColor = Color.red;
+		selectedColor = Color.blue;
 		SelectInnerColor (Vector2.zero);
 		finalColorSprite.color=finalColor;
 
