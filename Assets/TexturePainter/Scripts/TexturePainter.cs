@@ -16,7 +16,7 @@ public class TexturePainter : MonoBehaviour {
 	public Sprite cursorPaint,cursorDecal; // Cursor for the differen functions 
 	public RenderTexture canvasTexture; // Render Texture that looks at our Base Texture and the painted brushes
 	public Material baseMaterial; // The material of our base texture (Were we will save the painted texture)
-
+    public Texture2D stencilSprite; //sprite for the stencil
 	Painter_BrushMode mode; //Our painter mode (Paint brushes or decals)
 	float brushSize=1.0f; //The size of our brush
 	Color brushColor; //The selected color
@@ -75,18 +75,32 @@ public class TexturePainter : MonoBehaviour {
 	}
 	//Returns the position on the texuremap according to a hit in the mesh collider
 	bool HitTestUVPosition(ref Vector3 uvWorldPosition){
-		RaycastHit hit;
-		Vector3 cursorPos = new Vector3 (Input.mousePosition.x, Input.mousePosition.y, 0.0f);
-		Ray cursorRay=sceneCamera.ScreenPointToRay (cursorPos);
+
+        RaycastHit[] hits;
+        Vector3 cursorPos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0.0f);
+        Ray cursorRay = sceneCamera.ScreenPointToRay(cursorPos);
+        hits = Physics.RaycastAll(cursorRay,10, 100);
+
+        for(int i = 0; i<hits.Length;i++)
+        {
+
+        }
+        RaycastHit hit;
+		
+		
 		if (Physics.Raycast(cursorRay,out hit,200)){
 			MeshCollider meshCollider = hit.collider as MeshCollider;
 			if (meshCollider == null || meshCollider.sharedMesh == null /*|| meshCollider.tag == "canvas2"*/)
                 return false;			
 			Vector2 pixelUV  = new Vector2(hit.textureCoord.x,hit.textureCoord.y);
-			uvWorldPosition.x=pixelUV.x-canvasCam.orthographicSize;//To center the UV on X
-			uvWorldPosition.y=pixelUV.y-canvasCam.orthographicSize;//To center the UV on Y
-			uvWorldPosition.z=0.0f;
-			return true;
+            Debug.Log(pixelUV);
+            //stencilSprite.GetPixel((int)(pixelUV.x * stencilSprite.width), (int)(pixelUV.y * stencilSprite.height));
+			Color canvasColor = stencilSprite.GetPixel((int)(pixelUV.x * stencilSprite.width), (int)(pixelUV.y * stencilSprite.height));
+            Debug.Log(canvasColor);
+            uvWorldPosition.x = pixelUV.x - canvasCam.orthographicSize;//To center the UV on X
+            uvWorldPosition.y = pixelUV.y - canvasCam.orthographicSize;//To center the UV on Y
+            uvWorldPosition.z = 0.0f;
+            return canvasColor.a < 0.5f;
 		}
 		else{		
 			return false;
