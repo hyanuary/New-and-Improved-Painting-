@@ -108,7 +108,9 @@ public class TexturePainter : MonoBehaviour {
             //stencil detection
             if (stencilColor.a > 0.5f)
             {
-                Debug.Log("white");
+                canvasColor.r = 1.0f;
+                Debug.Log(canvasColor.r);
+                mainTex.Apply();
             }
 
 
@@ -116,32 +118,7 @@ public class TexturePainter : MonoBehaviour {
 
         }
         return true;
-        //return canvasColor.a < 0.5f;
-
-        //RaycastHit hit /*= hits[i];
-        //if (Physics.Raycast(cursorRay, out hit, 200))
-        //{
-        //    MeshCollider meshCollider = hit.collider as MeshCollider;
-        //    if (meshCollider == null || meshCollider.sharedMesh == null /*|| meshCollider.tag == "canvas2"*/)
-        //        return false;
-        //    Vector2 pixelUV = new Vector2(hit.textureCoord.x, hit.textureCoord.y);
-        //    Debug.Log(pixelUV);
-        //    stencilSprite.GetPixel((int)(pixelUV.x * stencilSprite.width), (int)(pixelUV.y * stencilSprite.height));
-        //    Color canvasColor = stencilSprite.GetPixel((int)(pixelUV.x * stencilSprite.width), (int)(pixelUV.y * stencilSprite.height));
-        //    Debug.Log(canvasColor);
-        //    uvWorldPosition.x = pixelUV.x - canvasCam.orthographicSize;//To center the UV on X
-        //    uvWorldPosition.y = pixelUV.y - canvasCam.orthographicSize;//To center the UV on Y
-        //    uvWorldPosition.z = 0.0f;
-        //    return canvasColor.a < 0.5f;
-        //}
-        //else
-        //{
-        //    return false;
-        //}
-
-
-
-
+        
     }
     //Sets the base material with a our canvas texture, then removes all our brushes
     void SaveTexture()
@@ -157,36 +134,8 @@ public class TexturePainter : MonoBehaviour {
             Destroy(child.gameObject);
         }
 
-
-        // make everything white
-        //for (int x = 0; x < tex.width; x++)
-        //{
-        //    for (int y = 0; y < tex.height; y++)
-        //    {
-        //        tex.SetPixel(x, y, Color.white);
-        //    }
-        //}
-
-        //stencil part
-        //RaycastHit hit;
-        //if (Physics.Raycast(stencil.transform.position, Vector3.forward, out hit))
-        //{
-        //    Renderer rend = hit.transform.GetComponent<Renderer>();
-        //    MeshCollider meshColl = hit.collider as MeshCollider;
-        //    //Debug.Log(meshColl.tag);
-
-        //    Vector2 pixelUV = hit.textureCoord;
-
-        //    int x = (int)(pixelUV.x * tex.width);
-        //    int y = (int)(pixelUV.y * tex.height);
-
-        //    //tex.SetPixel(x, y, Color.white);
-        //    //tex.Apply();
-        //    Debug.Log(pixelUV);
-        //}
         mainTex.Apply();
-        //Debug.Log("clear");
-        //Debug.Log(tex.GetPixel(2,10));
+
         //StartCoroutine ("SaveTextureToFile"); //Do you want to save the texture? This is your method!
         Invoke("ShowCursor", 0.1f);
     }
