@@ -14,17 +14,23 @@ public class TexturePainter : MonoBehaviour {
 	public GameObject brushCursor,brushContainer, stencil; //The cursor that overlaps the model and our container for the brushes painted
 	public Camera sceneCamera,canvasCam;  //The camera that looks at the model, and the camera that looks at the canvas.
 	public Sprite cursorPaint,cursorDecal; // Cursor for the differen functions 
-	public RenderTexture canvasTexture; // Render Texture that looks at our Base Texture and the painted brushes
-	public Material baseMaterial; // The material of our base texture (Were we will save the painted texture)
-    public Texture2D stencilSprite; //sprite for the stencil
-	Painter_BrushMode mode; //Our painter mode (Paint brushes or decals)
+	public RenderTexture canvasTexture; // Render Texture that lotor decals)
 	float brushSize=1.0f; //The size of our brush
 	Color brushColor; //The selected color
-	public int brushCounter=0,MAX_BRUSH_COUNT=50; //To avoid having millions of brushes
-	bool saving=false; //Flag to check if we are saving the texture
+	public int brushCounter=0,MAX_BRUSH_COUNT=50; //To avoid havoks at our Base Texture and the painted brushes
+	public Material baseMaterial; // The material of our base texing millions of brushes
+	bool saving=false; //Flag to check if we are saving the texturure (Were we will save the painted texture)
+    public Texture2D stencilSprite; //sprite for the stencil
+	Painter_BrushMode mode; //Our painter mode (Paint brushes e
+    Texture2D mainTex;
 
-	
-	void Update () {
+    void Start()
+    {
+        mainTex = new Texture2D(canvasTexture.width, canvasTexture.height, TextureFormat.RGB24, false);
+    }
+
+
+    void Update () {
 		brushColor = ColorSelector.GetColor ();	//Updates our painted color with the selected color
 		if (Input.GetMouseButton(0)) {
 			DoAction();
@@ -79,44 +85,73 @@ public class TexturePainter : MonoBehaviour {
         RaycastHit[] hits;
         Vector3 cursorPos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0.0f);
         Ray cursorRay = sceneCamera.ScreenPointToRay(cursorPos);
-        hits = Physics.RaycastAll(cursorRay,10, 100);
+        hits = Physics.RaycastAll(cursorRay,1000);
+       
 
-        for(int i = 0; i<hits.Length;i++)
+        for (int i = 0; i < hits.Length; i++)
         {
+            RaycastHit hit1 = hits[i];
+            MeshCollider mesh1 = hits[i].collider as MeshCollider;
+            if (mesh1 == null || mesh1.sharedMesh == null /*|| hits[0].collider.tag == "stencil"*/)
+                return false;
+            //Debug.Log(mesh1.tag);
+            Vector2 pixelUV1 = new Vector2(hit1.textureCoord.x, hit1.textureCoord.y);
+            //Debug.Log(pixelUV1);
+            Color stencilColor = stencilSprite.GetPixel((int)(pixelUV1.x * stencilSprite.width), (int)(pixelUV1.y * stencilSprite.height));
+            Color canvasColor = mainTex.GetPixel((int)(pixelUV1.x * mainTex.width), (int)(pixelUV1.y * mainTex.height));
+            Debug.Log(canvasColor);
+            //Debug.Log(stencilColor);
+            uvWorldPosition.x = pixelUV1.x - canvasCam.orthographicSize;//To center the UV on X
+            uvWorldPosition.y = pixelUV1.y - canvasCam.orthographicSize;//To center the UV on Y
+            uvWorldPosition.z = 0.0f;
+
+            //stencil detection
+            if (stencilColor.a > 0.5f)
+            {
+                Debug.Log("white");
+            }
+
+
+            //return canvasColor.r > 1.0f;
 
         }
-        RaycastHit hit;
-		
-		
-		if (Physics.Raycast(cursorRay,out hit,200)){
-			MeshCollider meshCollider = hit.collider as MeshCollider;
-			if (meshCollider == null || meshCollider.sharedMesh == null /*|| meshCollider.tag == "canvas2"*/)
-                return false;			
-			Vector2 pixelUV  = new Vector2(hit.textureCoord.x,hit.textureCoord.y);
-            Debug.Log(pixelUV);
-            //stencilSprite.GetPixel((int)(pixelUV.x * stencilSprite.width), (int)(pixelUV.y * stencilSprite.height));
-			Color canvasColor = stencilSprite.GetPixel((int)(pixelUV.x * stencilSprite.width), (int)(pixelUV.y * stencilSprite.height));
-            Debug.Log(canvasColor);
-            uvWorldPosition.x = pixelUV.x - canvasCam.orthographicSize;//To center the UV on X
-            uvWorldPosition.y = pixelUV.y - canvasCam.orthographicSize;//To center the UV on Y
-            uvWorldPosition.z = 0.0f;
-            return canvasColor.a < 0.5f;
-		}
-		else{		
-			return false;
-		}
-		
-	}
+        return true;
+        //return canvasColor.a < 0.5f;
+
+        //RaycastHit hit /*= hits[i];
+        //if (Physics.Raycast(cursorRay, out hit, 200))
+        //{
+        //    MeshCollider meshCollider = hit.collider as MeshCollider;
+        //    if (meshCollider == null || meshCollider.sharedMesh == null /*|| meshCollider.tag == "canvas2"*/)
+        //        return false;
+        //    Vector2 pixelUV = new Vector2(hit.textureCoord.x, hit.textureCoord.y);
+        //    Debug.Log(pixelUV);
+        //    stencilSprite.GetPixel((int)(pixelUV.x * stencilSprite.width), (int)(pixelUV.y * stencilSprite.height));
+        //    Color canvasColor = stencilSprite.GetPixel((int)(pixelUV.x * stencilSprite.width), (int)(pixelUV.y * stencilSprite.height));
+        //    Debug.Log(canvasColor);
+        //    uvWorldPosition.x = pixelUV.x - canvasCam.orthographicSize;//To center the UV on X
+        //    uvWorldPosition.y = pixelUV.y - canvasCam.orthographicSize;//To center the UV on Y
+        //    uvWorldPosition.z = 0.0f;
+        //    return canvasColor.a < 0.5f;
+        //}
+        //else
+        //{
+        //    return false;
+        //}
+
+
+
+
+    }
     //Sets the base material with a our canvas texture, then removes all our brushes
     void SaveTexture()
     {
         brushCounter = 0;
         System.DateTime date = System.DateTime.Now;
         RenderTexture.active = canvasTexture;
-        Texture2D tex = new Texture2D(canvasTexture.width, canvasTexture.height, TextureFormat.RGB24, false);
-        tex.ReadPixels(new Rect(0, 0, canvasTexture.width, canvasTexture.height), 0, 0);
+        mainTex.ReadPixels(new Rect(0, 0, canvasTexture.width, canvasTexture.height), 0, 0);
         RenderTexture.active = null;
-        baseMaterial.mainTexture = tex; //Put the painted texture as the base
+        baseMaterial.mainTexture = mainTex; //Put the painted texture as the base
         foreach (Transform child in brushContainer.transform)
         {//Clear brushes
             Destroy(child.gameObject);
@@ -149,8 +184,8 @@ public class TexturePainter : MonoBehaviour {
         //    //tex.Apply();
         //    Debug.Log(pixelUV);
         //}
-        tex.Apply();
-        Debug.Log("clear");
+        mainTex.Apply();
+        //Debug.Log("clear");
         //Debug.Log(tex.GetPixel(2,10));
         //StartCoroutine ("SaveTextureToFile"); //Do you want to save the texture? This is your method!
         Invoke("ShowCursor", 0.1f);
